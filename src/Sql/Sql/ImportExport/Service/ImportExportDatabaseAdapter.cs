@@ -52,13 +52,18 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Service
         /// <returns>Operation response including the OperationStatusLink to get the operation status</returns>
         public AzureSqlDatabaseImportExportBaseModel Export(AzureSqlDatabaseImportExportBaseModel exportRequest)
         {
-            ExportRequestParameters parameters = new ExportRequestParameters()
+            Management.Sql.Models.ImportExportDatabaseDefinition parameters = new Management.Sql.Models.ImportExportDatabaseDefinition()
             {
                 AdministratorLogin = exportRequest.AdministratorLogin,
                 AdministratorLoginPassword = AzureSqlServerAdapter.Decrypt(exportRequest.AdministratorLoginPassword),
                 StorageKey = exportRequest.StorageKey,
                 StorageKeyType = exportRequest.StorageKeyType.ToString(),
-                StorageUri = exportRequest.StorageUri
+                StorageUri = exportRequest.StorageUri.ToString(),
+                NetworkIsolation = new Management.Sql.Models.NetworkIsolationSettings()
+                {
+                    SqlServerResourceId = exportRequest.SqlServerResourceId,
+                    StorageAccountResourceId = exportRequest.StorageAccountResourceId
+                }
             };
 
             if (exportRequest.AuthenticationType != AuthenticationType.None)
@@ -66,7 +71,7 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Service
                 parameters.AuthenticationType = exportRequest.AuthenticationType.ToString().ToLowerInvariant();
             }
 
-            ImportExportResponse response = Communicator.Export(exportRequest.ResourceGroupName, exportRequest.ServerName,
+            Management.Sql.Models.ImportExportOperationResult response = Communicator.Export(exportRequest.ResourceGroupName, exportRequest.ServerName,
                 exportRequest.DatabaseName, parameters);
             return CreateImportExportResponse(response, exportRequest);
         }
@@ -78,17 +83,22 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Service
         /// <returns>Operation response including the OperationStatusLink to get the operation status</returns>
         public AzureSqlDatabaseImportExportBaseModel Import(AzureSqlDatabaseImportModel importRequest)
         {
-            ImportRequestParameters parameters = new ImportRequestParameters()
+            Management.Sql.Models.ImportExportDatabaseDefinition parameters = new Management.Sql.Models.ImportExportDatabaseDefinition()
             {
                 AdministratorLogin = importRequest.AdministratorLogin,
                 AdministratorLoginPassword = AzureSqlServerAdapter.Decrypt(importRequest.AdministratorLoginPassword),
                 StorageKey = importRequest.StorageKey,
                 StorageKeyType = importRequest.StorageKeyType.ToString(),
-                StorageUri = importRequest.StorageUri,
-                DatabaseMaxSize = importRequest.DatabaseMaxSizeBytes,
+                StorageUri = importRequest.StorageUri.ToString(),
+                MaxSizeBytes = importRequest.DatabaseMaxSizeBytes.ToString(),
                 Edition = importRequest.Edition != Database.Model.DatabaseEdition.None ? importRequest.Edition.ToString() : string.Empty,
                 ServiceObjectiveName = importRequest.ServiceObjectiveName,
-                DatabaseName = importRequest.DatabaseName
+                DatabaseName = importRequest.DatabaseName,
+                NetworkIsolation = new Management.Sql.Models.NetworkIsolationSettings()
+                {
+                    SqlServerResourceId = importRequest.SqlServerResourceId,
+                    StorageAccountResourceId = importRequest.StorageAccountResourceId
+                }
             };
 
             if (importRequest.AuthenticationType != AuthenticationType.None)
@@ -96,7 +106,7 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Service
                 parameters.AuthenticationType = importRequest.AuthenticationType.ToString().ToLowerInvariant();
             }
 
-            ImportExportResponse response = Communicator.Import(importRequest.ResourceGroupName, importRequest.ServerName, parameters);
+            Management.Sql.Models.ImportExportOperationResult response = Communicator.Import(importRequest.ResourceGroupName, importRequest.ServerName, parameters);
 
             return CreateImportExportResponse(response, importRequest);
         }
@@ -128,12 +138,11 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Service
         /// </summary>
         /// <param name="response">Server Response</param>
         /// <returns>Response Model</returns>
-        private AzureSqlDatabaseImportExportBaseModel CreateImportExportResponse(ImportExportResponse response, AzureSqlDatabaseImportExportBaseModel originalModel)
+        private AzureSqlDatabaseImportExportBaseModel CreateImportExportResponse(Management.Sql.Models.ImportExportOperationResult response, AzureSqlDatabaseImportExportBaseModel originalModel)
         {
             AzureSqlDatabaseImportExportBaseModel model = originalModel == null ? new AzureSqlDatabaseImportExportBaseModel() : originalModel.Copy();
-            model.OperationStatusLink = response.OperationStatusLink;
-            model.Status = response.Status.ToString();
-            model.ErrorMessage = response.Error == null ? "" : response.Error.Message;
+            model.Status = response.Status;
+            model.ErrorMessage = response.ErrorMessage;
             return model;
         }
     }

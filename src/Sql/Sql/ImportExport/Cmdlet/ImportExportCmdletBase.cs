@@ -97,6 +97,24 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Cmdlet
         }
 
         /// <summary>
+        /// Gets or sets the sql server resource ID for network isolation
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "The SQL Server resource ID for network isolation")]
+        public string SqlServerResourceId
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets or sets the storage account resource ID for network isolation
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "The storage account resource ID for network isolation")]
+        public string StorageAccountResourceId
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Intializes the model adapter
         /// </summary>
         /// <returns>The server adapter</returns>

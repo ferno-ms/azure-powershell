@@ -51,7 +51,9 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Cmdlet
                 ServerName = ServerName,
                 StorageKey = StorageKey,
                 StorageKeyType = StorageKeyType,
-                StorageUri = StorageUri
+                StorageUri = StorageUri,
+                SqlServerResourceId = SqlServerResourceId,
+                StorageAccountResourceId = StorageAccountResourceId
             };
             return exportRequest;
         }

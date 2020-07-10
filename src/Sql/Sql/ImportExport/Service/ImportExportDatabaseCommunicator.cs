@@ -16,8 +16,8 @@ using Microsoft.Azure.Commands.Common.Authentication;
 using Microsoft.Azure.Commands.Common.Authentication.Abstractions;
 using Microsoft.Azure.Commands.Common.Authentication.Models;
 using Microsoft.Azure.Commands.Sql.Common;
+using Microsoft.Azure.Management.Sql;
 using Microsoft.Azure.Management.Sql.LegacySdk;
-using Microsoft.Azure.Management.Sql.LegacySdk.Models;
 
 namespace Microsoft.Azure.Commands.Sql.Database.Services
 {
@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Commands.Sql.Database.Services
         /// <summary>
         /// The Sql client to be used by this end points communicator
         /// </summary>
-        private static SqlManagementClient SqlClient { get; set; }
+        private static Management.Sql.LegacySdk.SqlManagementClient SqlClient { get; set; }
 
         /// <summary>
         /// Gets or set the Azure subscription
@@ -52,24 +52,23 @@ namespace Microsoft.Azure.Commands.Sql.Database.Services
             if (context?.Subscription != Subscription)
             {
                 Subscription = context?.Subscription;
-                SqlClient = null;
             }
         }
 
         /// <summary>
         /// Creates new export request
         /// </summary>
-        public Management.Sql.LegacySdk.Models.ImportExportResponse Export(string resourceGroupName, string serverName, string databaseName, ExportRequestParameters parameters)
+        public Management.Sql.Models.ImportExportOperationResult Export(string resourceGroupName, string serverName, string databaseName, Management.Sql.Models.ImportExportDatabaseDefinition parameters)
         {
-            return GetCurrentSqlClient().ImportExport.Export(resourceGroupName, serverName, databaseName, parameters);
+            return GetCurrentSqlClient().Databases.Export(resourceGroupName, serverName, databaseName, parameters);
         }
 
         /// <summary>
         /// Creates new import request
         /// </summary>
-        public Management.Sql.LegacySdk.Models.ImportExportResponse Import(string resourceGroupName, string serverName, ImportRequestParameters parameters)
+        public Management.Sql.Models.ImportExportOperationResult Import(string resourceGroupName, string serverName, Management.Sql.Models.ImportExportDatabaseDefinition parameters)
         {
-            return GetCurrentSqlClient().ImportExport.Import(resourceGroupName, serverName, parameters);
+            return GetCurrentSqlClient().Databases.Import(resourceGroupName, serverName, parameters);
         }
 
         /// <summary>
@@ -77,7 +76,7 @@ namespace Microsoft.Azure.Commands.Sql.Database.Services
         /// </summary>
         public Management.Sql.LegacySdk.Models.ImportExportOperationStatusResponse GetStatus(string operationStatusLink)
         {
-            return GetCurrentSqlClient().ImportExport.GetImportExportOperationStatus(operationStatusLink);
+            return GetLegacySqlClient().ImportExport.GetImportExportOperationStatus(operationStatusLink);
         }
 
         /// <summary>
@@ -85,12 +84,24 @@ namespace Microsoft.Azure.Commands.Sql.Database.Services
         /// id tracing headers for the current cmdlet invocation.
         /// </summary>
         /// <returns>The SQL Management client for the currently selected subscription.</returns>
-        private SqlManagementClient GetCurrentSqlClient()
+        private Management.Sql.SqlManagementClient GetCurrentSqlClient()
+        {
+            // Get the SQL management client for the current subscription
+            var sqlClient = AzureSession.Instance.ClientFactory.CreateArmClient<Management.Sql.SqlManagementClient>(Context, AzureEnvironment.Endpoint.ResourceManager);
+            return sqlClient;
+        }
+
+        /// <summary>
+        /// Retrieve the SQL Management client for the currently selected subscription, adding the session and request
+        /// id tracing headers for the current cmdlet invocation.
+        /// </summary>
+        /// <returns>The SQL Management client for the currently selected subscription.</returns>
+        private Management.Sql.LegacySdk.SqlManagementClient GetLegacySqlClient()
         {
             // Get the SQL management client for the current subscription
             if (SqlClient == null)
             {
-                SqlClient = AzureSession.Instance.ClientFactory.CreateClient<SqlManagementClient>(Context, AzureEnvironment.Endpoint.ResourceManager);
+                SqlClient = AzureSession.Instance.ClientFactory.CreateClient<Management.Sql.LegacySdk.SqlManagementClient>(Context, AzureEnvironment.Endpoint.ResourceManager);
             }
             return SqlClient;
         }

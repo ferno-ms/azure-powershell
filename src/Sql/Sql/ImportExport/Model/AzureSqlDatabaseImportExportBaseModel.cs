@@ -92,6 +92,22 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Model
         }
 
         /// <summary>
+        /// Gets or sets the sql server resource ID for network isolation
+        /// </summary>
+        public string SqlServerResourceId
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Gets or sets the storage account resource ID for network isolation
+        /// </summary>
+        public string StorageAccountResourceId
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Gets or sets the operationStatusLink
         /// </summary>
         public string OperationStatusLink
@@ -122,7 +138,9 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Model
                 AuthenticationType = AuthenticationType,
                 DatabaseName = DatabaseName,
                 StorageKeyType = StorageKeyType,
-                StorageUri = StorageUri
+                StorageUri = StorageUri,
+                SqlServerResourceId = SqlServerResourceId,
+                StorageAccountResourceId = StorageAccountResourceId
             };
         }
     }

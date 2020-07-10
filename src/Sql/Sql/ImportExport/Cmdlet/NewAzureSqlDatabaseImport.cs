@@ -108,7 +108,9 @@ namespace Microsoft.Azure.Commands.Sql.ImportExport.Cmdlet
                 StorageUri = StorageUri,
                 Edition = Edition,
                 ServiceObjectiveName = ServiceObjectiveName,
-                DatabaseMaxSizeBytes = DatabaseMaxSizeBytes
+                DatabaseMaxSizeBytes = DatabaseMaxSizeBytes,
+                SqlServerResourceId = SqlServerResourceId,
+                StorageAccountResourceId = StorageAccountResourceId
             };
             return exportRequest;
         }
